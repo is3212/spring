@@ -3,8 +3,6 @@
 	pageEncoding="UTF-8"%>
 	<div class="container">
 	<div class="container" style="text-align: center; padding-top: 20px;padding-bottom: 20px;">
-		<select id="s_vendor" class="selectpicker">
-		</select>
 		<label>회원이름 : </label> <input type="text" id="userName"/>
 		<input type="button" id="searchGoods" value="검색"/>
 		</div>
@@ -28,101 +26,109 @@
 			<tbody id="result_tbody">
 			</tbody>
 		</table>
-		<center><button id="btnInsert" class="btn btn-primary" type="button">상품등록</button></center>
+		<center><button id="btnInsert" class="btn btn-primary" type="button">회원등록</button></center>
 	</div>
 	<div class="jb-center" style="text-align: center">
 		<ul class="pagination" id="page">
 		</ul>
 	</div>
 	<script>
-	var pageInfo={};
-	var nowPage="<%=request.getParameter("nowPage")%>";
-	
-	if(nowPage=="null"){
-		nowPage="1";
-	}
-	$("#btnInsert").click(function(){
-		location.href="/goods/goods_insert.jsp";
+	$(document).ready(function(){
+		var param = {};
+		param["userName"] = "";
+		param = JSON.stringify(param);
+		var a = { 
+		        type     : "POST"
+		    	    ,   url      : "${pageContext.request.contextPath}/user/list"
+		    	    ,   dataType : "json" 
+		    	    ,   beforeSend: function(xhr) {
+		    	        xhr.setRequestHeader("Accept", "application/json");
+		    	        xhr.setRequestHeader("Content-Type", "application/json");
+		    	    }
+		    	    ,   data     : param
+		    	    ,   success : function(result){
+		    	    	$("#table").bootstrapTable('destroy');
+		    	    	var userList = result.userList;
+		    	    	var result = "";
+		    	    	for(var i=0, max=userList.length;i<max;i++){
+		    	    		var user = userList[i];
+		    	    		result+="<tr>";
+		    	    		result+="<td class='text-center'>" + user.userNum+"</td>";
+		    	    		result+="<td class='text-center'>" + user.userId+"</td>";
+		    	    		result+="<td class='text-center'>" + user.userName+"</td>";
+		    	    		result+="<td class='text-center'>" + user.age+"</td>";
+		    	    		result+="<td class='text-center'>" + user.address+"</td>";
+		    	    		result+="<td class='text-center'>" + user.hp1+"</td>";
+		    	    		result+="<td class='text-center'>" + user.hp2+"</td>";
+		    	    		result+="<td class='text-center'>" + user.hp3+"</td>";
+		    	    		result+="<td class='text-center'>" + user.gender+"</td>";
+		    	    		result+="<td class='text-center'>" + user.userRoleLevel+"</td>";
+		    	    		result+="<td class='text-center'>" + user.departNum+"</td>";
+		    	    		result +="</tr>";
+		    	    	}
+		    	    	$("#result_tbody").html(result);
+		    	    	
+		    	    }
+		    	    ,   error : function(xhr, status, e) {
+		    		    	alert("에러 : "+e);
+		    		},
+		    		done : function(e) {
+		    		}
+		    		};
+		$.ajax(a);
 	})
+	
 	$("#searchGoods").click(function(){
-		var giName=$("#giName").val().trim();
-		var viNum=$("#s_vendor").val().trim();
-		if(giName=="" && viNum==""){
-			alert("회사 선택이나 제품명을 입력해주세요");
+		var userName= $("#userName").val().trim();
+		if(userName==""){
+			alert("회원이름을 입력해주세요");
 			return
 		}
-		var params={};
-		if(giName!=""){
-			params["giName"]=giName;
+		var param = {};
+		if(userName!=""){
+			param["userName"]=userName;
 		}
-		if(viNum!=""){
-			params["viNum"]=viNum;	
-		}
-		params["command"]="list";
-		var page={};
-		page["nowPage"]=nowPage;
-		params["page"]=page;
-		movePageWithAjax(params,"/list.goods",callback);
-	});
-		function callback(results) {
-			var goodsList = results.goodslist;
-			pageInfo=results.page;
-			var vendorList=results.vendorlist;
-			var search=results.search;
-			var vendorStr="<option value=' '>회사선택</option>";
-			for(var i=0, max=vendorList.length;i<max;i++){
-				var vendor=vendorList[i];
-			var selectStr="";
-			if(search.viNum==vendor.viNum){
-				selectStr="selected";
-			}
-				vendorStr+="<option value='" + vendor.viNum + "' " + selectStr  + ">" + vendor.viName + "</option>";	
-			}
-			$("#s_vendor").html(vendorStr);
-			var params={};
-			if(search.viNum!=0){
-				params["viNum"]=search.viNum;
-			}
-			if(search.giName){
-				params["giName"]=search.giName;
-			}
-			makePagination(pageInfo,"page");
-			setEvent(pageInfo,"/list.goods");
-			$("#table").bootstrapTable('destroy');
-			var tableStr="";
-			for(var i=0, max=goodsList.length;i<max;i++){
-				var goods=goodsList[i];
-				tableStr+="<tr data-view='" + goods.giNum + "'>";
-				tableStr+="<td class='text-center'>" + goods.giNum+"</td>";
-				tableStr+="<td class='text-center'>" + goods.giName+"</td>";
-				tableStr+="<td class='text-center'>" + goods.giDesc+"</td>";
-				tableStr+="<td class='text-center'>" + goods.viNum+"</td>";
-				tableStr+="<td class='text-center'>" + goods.viName+"</td>";
-				tableStr+="</tr>";
-			}
-			$("#result_tbody").html(tableStr);
-			$("tbody[id='result_tbody']>tr[data-view]").click(function(){
-				var params={};
-				params["giNum"]=this.getAttribute("data-view");
-				params["command"]="view";
-				var page={};
-				page["nowPage"]=pageInfo.nowPage;
-				params["page"]=page;
-				movePageWithAjax(params, "/list.goods", callBackView);
-			});
-			}
-	function callBackView(result){
-		var url=result.url + "?nowPage=" + result.page.nowPage + "&giNum=" + result.goods.giNum + "&giName=" + result.goods.giName + "&giDesc=" + result.goods.giDesc + "&viNum=" + result.goods.viNum + "&viName=" + result.goods.viName;
-		location.href=url;
-	}
-		$(document).ready(function() {
-			var page = {};
-			page["nowPage"] = nowPage;
-			var params = {};
-			params["page"] = page;
-			params["command"] = "list";
-			movePageWithAjax(params, "/list.goods", callback);
-		});
+		param = JSON.stringify(param);
+		var a = { 
+		        type     : "POST"
+		    	    ,   url      : "${pageContext.request.contextPath}/user/list"
+		    	    ,   dataType : "json" 
+		    	    ,   beforeSend: function(xhr) {
+		    	        xhr.setRequestHeader("Accept", "application/json");
+		    	        xhr.setRequestHeader("Content-Type", "application/json");
+		    	    }
+		    	    ,   data     : param
+		    	    ,   success : function(result){
+		    	    	$("#table").bootstrapTable('destroy');
+		    	    	var userList = result.userList;
+		    	    	var result = "";
+		    	    	for(var i=0, max=userList.length;i<max;i++){
+		    	    		var user = userList[i];
+		    	    		result+="<tr>";
+		    	    		result+="<td class='text-center'>" + user.userNum+"</td>";
+		    	    		result+="<td class='text-center'>" + user.userId+"</td>";
+		    	    		result+="<td class='text-center'>" + user.userName+"</td>";
+		    	    		result+="<td class='text-center'>" + user.age+"</td>";
+		    	    		result+="<td class='text-center'>" + user.address+"</td>";
+		    	    		result+="<td class='text-center'>" + user.hp1+"</td>";
+		    	    		result+="<td class='text-center'>" + user.hp2+"</td>";
+		    	    		result+="<td class='text-center'>" + user.hp3+"</td>";
+		    	    		result+="<td class='text-center'>" + user.gender+"</td>";
+		    	    		result+="<td class='text-center'>" + user.userRoleLevel+"</td>";
+		    	    		result+="<td class='text-center'>" + user.departNum+"</td>";
+		    	    		result +="</tr>";
+		    	    	}
+		    	    	$("#result_tbody").html(result);
+		    	    	
+		    	    }
+		    	    ,   error : function(xhr, status, e) {
+		    		    	alert("에러 : "+e);
+		    		},
+		    		done : function(e) {
+		    		}
+		    		};
+		$.ajax(a);
+	})
 		
 	</script>
 </body>

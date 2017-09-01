@@ -14,9 +14,24 @@ public class UserInfo {
 	private String hp3;
 	private String gender;
 	private String userRoleLevel;
+	private boolean saveId;
 	
 	private int departNum;
 	private int userNum;
+	
+	@Override
+	public String toString() {
+		return "UserInfo [userId=" + userId + ", userPwd=" + userPwd + ", userName=" + userName + ", age=" + age
+				+ ", address=" + address + ", hp1=" + hp1 + ", hp2=" + hp2 + ", hp3=" + hp3 + ", gender=" + gender
+				+ ", userRoleLevel=" + userRoleLevel + ", saveId=" + saveId + ", departNum=" + departNum + ", userNum="
+				+ userNum + "]";
+	}
+	public boolean isSaveId() {
+		return saveId;
+	}
+	public void setSaveId(boolean saveId) {
+		this.saveId = saveId;
+	}
 	
 	public String getGender() {
 		return gender;

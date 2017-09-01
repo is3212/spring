@@ -1,18 +1,18 @@
 <%@ include file="/WEB-INF/views/common/header.jsp" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
+<link rel="stylesheet" href="${pageContext.request.contextPath}/resources/ui/signin.css" />
 <body>
-
 <div class="container">
 <center><img src="http://cfile25.uf.tistory.com/image/2521124C588467AA12BF0A" style="width:304px;height:250px"></center>
         <h2 class="form-signin-heading">Please login</h2>
         <label for="inputEmail" class="sr-only">ID</label>
-        <input type="text" name="id"  id="id" class="form-control" placeholder="ID" required autofocus>
+        <input type="text" name="id"  id="id" class="form-control" placeholder="ID" required value="${userId}" autofocus>
         <label for="inputPassword" class="sr-only">Password</label>
         <input type="password" name="pwd" id="pwd" class="form-control" placeholder="Password" required>
         <div class="checkbox">
           <label>
-            <input type="checkbox" value="remember-me"> Remember me
+            <input type="checkbox" value="1" id="saveId"> Remember me
           </label>
         </div>
         <button id="btn2" type="button"  class="form-control2" >Login in</button>
@@ -25,6 +25,7 @@
     	 var param={};
     	 param["userId"]=id;
     	 param["userPwd"]=pwd;
+    	 param["saveId"]=$("#saveId").prop("checked");
     	 param=JSON.stringify(param);
     	 $.ajax({ 
              type     : "POST"
@@ -41,7 +42,7 @@
             	location.href="${pageContext.request.contextPath}/user/main";
             }else{
             	$("#id").val("");
-            	var pwd=$("#pwd").val("");
+            	$("#pwd").val("");
             }
          }
          ,   error : function(xhr, status, e) {

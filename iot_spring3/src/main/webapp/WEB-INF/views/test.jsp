@@ -4,10 +4,20 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>Insert title here</title>
+<title>${title}</title>
 </head>
 <body>
-${test}
-${hm.get("test")}
+<form action="/sp/test/test1" method="get">
+<input type="text" name="exam">
+<input type="submit">
+</form>
+<form action="/sp/test/test1" method="post">
+<input type="text" name="exam">
+<input type="submit">
+</form>
+<form action="/sp/test/t" method="post">
+<input type="text" name="exam">
+<input type="submit">
+</form>
 </body>
 </html>
